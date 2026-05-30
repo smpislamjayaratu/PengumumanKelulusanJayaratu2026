@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengumuman Kelulusan SMP Islam Jayaratu</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #0f9d58 0%, #4285f4 100%);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 30px 20px;
+        margin: 0;
+    }
+.container {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(15px);
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 700px;
+        width: 100%;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    h1 { text-align: center; margin-bottom: 5px; }
+    p.subtitle { text-align: center; opacity: 0.9; margin-bottom: 5px; font-weight: 500; }
+    p.tp { text-align: center; opacity: 0.9; margin-bottom: 30px; font-size: 15px; }
+.upload-box {
+        border: 2px dashed rgba(255,255,255,0.5);
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    input[type="file"] { display: none; }
+.upload-btn {
+        background: #fff;
+        color: #0f9d58;
+        padding: 12px 25px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        display: inline-block;
+    }
+    input[type="text"] {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        text-align: center;
+        margin-bottom: 15px;
+        box-sizing: border-box;
+        color: #333;
+    }
+    button {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        background: #fbbc05;
+        color: #333;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    button:hover { opacity: 0.9; }
+.result {
+        margin-top: 25px;
+        padding: 25px;
+        border-radius: 15px;
+        display: none;
+        text-align: center;
+    }
+.lulus { background: #0f9d58; }
+.tidak-lulus { background: #db4437; }
+.nilai-box {
+        background: rgba(255,255,255,0.2);
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+        font-size: 20px;
+        font-weight: bold;
+ }
+.info { font-size: 14px; opacity: 0.8; text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>🎓 PENGUMUMAN KELULUSAN</h1>
+    <p class="subtitle">SMP ISLAM JAYARATU - KELAS 9</p>
+    <p class="tp">Tahun Pelajaran 2025/2026</p>
+
+    <div class="upload-box" id="uploadBox">
+        <p><strong>Step 1:</strong> Upload file Excel data siswa</p>
+        <p style="font-size: 13px; opacity: 0.8;">Kolom wajib: NISN, Nama, Kelas, Status, Nilai</p>
+        <label for="excelFile" class="upload-btn">Pilih File Excel</label>
+        <input type="file" id="excelFile" accept=".xlsx,.xls">
+        <p id="fileInfo" style="margin-top: 15px;"></p>
+    </div>
+
+    <div id="cekSection" style="display:none;">
+        <input type="text" id="nisn" placeholder="Masukkan NISN kamu" maxlength="10" inputmode="numeric">
+        <button onclick="cekKelulusan()">Cek Hasil</button>
+
+        <div id="result" class="result">
+            <h2 id="status"></h2>
+            <p id="nama"></p>
+            <p id="kelas"></p>
+            <div class="nilai-box">
+                Nilai Rata-rata: <span id="nilai"></span>
+            </div>
+        </div>
+        <p id="error" style="color:#ffcccc; text-align:center;"></p>
+    </div>
+
+    <p class="info">Data diproses langsung di browser. Aman.</p>
+</div>
+
+<script>
+let dataSiswa = {};
+
+document.getElementById('excelFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    document.getElementById('fileInfo').textContent = `Membaca file: ${file.name}...`;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type: 'array'});
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet);
+
+        dataSiswa = {};
+        json.forEach(row => {
+            const nisn = String(row.NISN).trim();
+            if (nisn && nisn.length === 10) {
+                dataSiswa = {
+                    nama: row.Nama,
+                    kelas: row.Kelas,
+                    status: String(row.Status).toUpperCase(),
+                    nilai: row.Nilai || '-'
+                };
+            }
+        });
+
+        document.getElementById('fileInfo').textContent = `✅ Berhasil load ${Object.keys(dataSiswa).length} data siswa`;
+        document.getElementById('cekSection').style.display = 'block';
+        document.getElementById('uploadBox').style.display = 'none';
+    };
+    reader.readAsArrayBuffer(file);
+});
+
+function cekKelulusan() {
+    const nisn = document.getElementById('nisn').value.trim();
+    const resultDiv = document.getElementById('result');
+    const errorP = document.getElementById('error');
+
+    resultDiv.style.display = 'none';
+    errorP.textContent = '';
+
+    if (!dataSiswa) {
+        errorP.textContent = 'NISN tidak ditemukan. Cek lagi atau hubungi TU.';
+        return;
+    }
+
+    const siswa = dataSiswa;
+    document.getElementById('nama').textContent = `Nama: ${siswa.nama}`;
+    document.getElementById('kelas').textContent = `Kelas: ${siswa.kelas}`;
+    document.getElementById('nilai').textContent = siswa.nilai;
+
+    if (siswa.status === "LULUS") {
+        document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
+        resultDiv.className = 'result lulus';
+    } else {
+        document.getElementById('status').textContent = 'MOHON MAAF, BELUM LULUS';
+        resultDiv.className = 'result tidak-lulus';
+    }
+
+    resultDiv.style.display = 'block';
+}
+
+document.getElementById('nisn').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') cekKelulusan();
+});
+</script>
+</body>
+</html>
