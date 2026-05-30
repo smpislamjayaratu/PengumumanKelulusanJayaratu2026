@@ -15,6 +15,7 @@
         min-height: 100vh;
         padding: 30px 20px;
         margin: 0;
+        overflow-x: hidden;
     }
 .container {
         background: rgba(255,255,255,0.15);
@@ -24,6 +25,8 @@
         max-width: 700px;
         width: 100%;
         box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
     }
     h1 { text-align: center; margin-bottom: 5px; }
     p.subtitle { text-align: center; opacity: 0.9; margin-bottom: 5px; font-weight: 500; }
@@ -49,14 +52,52 @@
         font-size: 18px;
         font-weight: bold;
         cursor: pointer;
+        transition: all 0.3s;
     }
-    button:hover { opacity: 0.9; }
+    button:hover { opacity: 0.9; transform: scale(1.02); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.loading {
+        margin-top: 25px;
+        text-align: center;
+        display: none;
+    }
+   .loading-text {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        animation: pulse 1.5s infinite;
+        line-height: 1.5;
+    }
+   .spinner {
+        border: 4px solid rgba(255,255,255,0.3);
+        border-top: 4px solid #fbbc05;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+
 .result {
         margin-top: 25px;
         padding: 25px;
         border-radius: 15px;
         display: none;
         text-align: center;
+        animation: fadeIn 0.5s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 .lulus { background: #0f9d58; }
 .tidak-lulus { background: #db4437; }
@@ -69,6 +110,22 @@
         font-weight: bold;
  }
 .info { font-size: 14px; opacity: 0.8; text-align: center; margin-top: 20px; }
+
+.confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #fbbc05;
+        top: -10px;
+        animation: confetti-fall 3s linear forwards;
+        z-index: 1;
+    }
+    @keyframes confetti-fall {
+        to {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+        }
+    }
 </style>
 </head>
 <body>
@@ -78,7 +135,12 @@
     <p class="tp">Tahun Pelajaran 2025/2026</p>
 
     <input type="text" id="nisn" placeholder="Masukkan NISN kamu" maxlength="10" inputmode="numeric">
-    <button onclick="cekKelulusan()">Cek Hasil</button>
+    <button id="btnCek" onclick="cekKelulusan()">Cek Hasil</button>
+
+    <div id="loading" class="loading">
+        <div class="loading-text" id="loadingText">Mohon tunggu... Sedang memproses data kelulusan</div>
+        <div class="spinner"></div>
+    </div>
 
     <div id="result" class="result">
         <h2 id="status"></h2>
@@ -90,8 +152,16 @@
     </div>
     <p id="error" style="color:#ffcccc; text-align:center; margin-top:15px;"></p>
 
-    <p class="info">Hubungi TU jika ada kesalahan data.</p>
+    <p class="info">Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr bila ada kendala</p>
 </div>
+
+<!-- Sound efek tegang pake base64 biar nggak perlu upload file -->
+<audio id="soundTegang" preload="auto">
+    <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU" type="audio/wav">
+</audio>
+<audio id="soundLulus" preload="auto">
+    <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU" type="audio/wav">
+</audio>
 
 <script>
 const dataSiswa = {
@@ -144,10 +214,66 @@ const dataSiswa = {
   "0097603197": {"nama": "Widna Khoirunnisa", "kelas": "9B", "status": "LULUS", "nilai": "-"}
 };
 
+// Fungsi bikin sound tegang pake Web Audio API biar nggak perlu file
+function playTegang() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.5);
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 3);
+}
+
+function playLulus() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const times = [0, 0.1, 0.2, 0.3];
+    const freqs = [523, 659, 784, 1046]; // C-E-G-C nada seneng
+
+    times.forEach((time, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = freqs[i];
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime + time);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + time + 0.3);
+        osc.start(audioCtx.currentTime + time);
+        osc.stop(audioCtx.currentTime + time + 0.3);
+    });
+}
+
+function createConfetti() {
+    const colors = ['#fbbc05', '#0f9d58', '#4285f4', '#db4437', '#ff6d00'];
+    for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
+        confetti.style.width = Math.random() * 8 + 5 + 'px';
+        confetti.style.height = Math.random() * 8 + 5 + 'px';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+    }
+}
+
 function cekKelulusan() {
     const nisn = document.getElementById('nisn').value.trim();
     const resultDiv = document.getElementById('result');
+    const loadingDiv = document.getElementById('loading');
+    const loadingText = document.getElementById('loadingText');
     const errorP = document.getElementById('error');
+    const btn = document.getElementById('btnCek');
 
     resultDiv.style.display = 'none';
     errorP.textContent = '';
@@ -157,26 +283,49 @@ function cekKelulusan() {
         return;
     }
 
-    const siswa = dataSiswa[nisn];
-
+    const siswa = dataSiswa;
     if (!siswa) {
-        errorP.textContent = 'NISN tidak ditemukan. Cek lagi atau hubungi TU.';
+        errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr';
         return;
     }
 
-    document.getElementById('nama').textContent = `Nama: ${siswa.nama}`;
-    document.getElementById('kelas').textContent = `Kelas: ${siswa.kelas}`;
-    document.getElementById('nilai').textContent = siswa.nilai;
+    // Ganti teks loading pake nama siswa
+    const namaPanggilan = siswa.nama.split(' ')[0]; // Ambil nama depan aja
+    const pesanLoading = [
+        `Harap menunggu sebentar, sistem sedang obrak-abrik data kelulusan Ananda ${namaPanggilan}...`,
+        `Sabar ya ${namaPanggilan}, server lagi buka berkas kamu nih...`,
+        `Siapkan cemilan Ananda ${namaPanggilan} sembari menunggu hasil...`,
+        `Jantung aman kan ${namaPanggilan}? Tunggu 3 detik ya...`
+    ];
+    loadingText.textContent = pesanLoading[Math.floor(Math.random() * pesanLoading.length)];
 
-    if (siswa.status === "LULUS") {
-        document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
-        resultDiv.className = 'result lulus';
-    } else {
-        document.getElementById('status').textContent = 'MOHON MAAF, BELUM LULUS';
-        resultDiv.className = 'result tidak-lulus';
-    }
+    loadingDiv.style.display = 'block';
+    btn.disabled = true;
+    btn.textContent = 'Memproses...';
 
-    resultDiv.style.display = 'block';
+    playTegang(); // Play sound tegang
+
+    setTimeout(() => {
+        loadingDiv.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = 'Cek Hasil';
+
+        document.getElementById('nama').textContent = `Nama: ${siswa.nama}`;
+        document.getElementById('kelas').textContent = `Kelas: ${siswa.kelas}`;
+        document.getElementById('nilai').textContent = siswa.nilai;
+
+        if (siswa.status === "LULUS") {
+            document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
+            resultDiv.className = 'result lulus';
+            createConfetti();
+            playLulus(); // Play sound lulus
+        } else {
+            document.getElementById('status').textContent = 'MOHON MAAF, BELUM LULUS';
+            resultDiv.className = 'result tidak-lulus';
+        }
+
+        resultDiv.style.display = 'block';
+    }, 3000);
 }
 
 document.getElementById('nisn').addEventListener('keypress', function(e) {
