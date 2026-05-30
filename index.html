@@ -62,14 +62,14 @@
         text-align: center;
         display: none;
     }
-   .loading-text {
+  .loading-text {
         font-size: 16px;
         font-weight: bold;
         margin-bottom: 15px;
         animation: pulse 1.5s infinite;
         line-height: 1.5;
     }
-   .spinner {
+  .spinner {
         border: 4px solid rgba(255,255,255,0.3);
         border-top: 4px solid #fbbc05;
         border-radius: 50%;
@@ -155,14 +155,6 @@
     <p class="info">Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr bila ada kendala</p>
 </div>
 
-<!-- Sound efek tegang pake base64 biar nggak perlu upload file -->
-<audio id="soundTegang" preload="auto">
-    <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU" type="audio/wav">
-</audio>
-<audio id="soundLulus" preload="auto">
-    <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU" type="audio/wav">
-</audio>
-
 <script>
 const dataSiswa = {
   "0097598340": {"nama": "Adelia Fitra Leilani", "kelas": "9A", "status": "LULUS", "nilai": "76,04"},
@@ -214,21 +206,17 @@ const dataSiswa = {
   "0097603197": {"nama": "Widna Khoirunnisa", "kelas": "9B", "status": "LULUS", "nilai": "-"}
 };
 
-// Fungsi bikin sound tegang pake Web Audio API biar nggak perlu file
 function playTegang() {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-
     oscillator.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-
     oscillator.type = 'sawtooth';
     oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
     oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.5);
     gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
-
     oscillator.start();
     oscillator.stop(audioCtx.currentTime + 3);
 }
@@ -236,8 +224,7 @@ function playTegang() {
 function playLulus() {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const times = [0, 0.1, 0.2, 0.3];
-    const freqs = [523, 659, 784, 1046]; // C-E-G-C nada seneng
-
+    const freqs = [523, 659, 784, 1046];
     times.forEach((time, i) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -283,14 +270,13 @@ function cekKelulusan() {
         return;
     }
 
-    const siswa = dataSiswa;
+    const siswa = dataSiswa[nisn]; // INI YANG BENER. TADI LUPA [nisn]
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr';
         return;
     }
 
-    // Ganti teks loading pake nama siswa
-    const namaPanggilan = siswa.nama.split(' ')[0]; // Ambil nama depan aja
+    const namaPanggilan = siswa.nama.split(' ')[0];
     const pesanLoading = [
         `Harap menunggu sebentar, sistem sedang obrak-abrik data kelulusan Ananda ${namaPanggilan}...`,
         `Sabar ya ${namaPanggilan}, server lagi buka berkas kamu nih...`,
@@ -303,7 +289,7 @@ function cekKelulusan() {
     btn.disabled = true;
     btn.textContent = 'Memproses...';
 
-    playTegang(); // Play sound tegang
+    playTegang();
 
     setTimeout(() => {
         loadingDiv.style.display = 'none';
@@ -318,7 +304,7 @@ function cekKelulusan() {
             document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
             resultDiv.className = 'result lulus';
             createConfetti();
-            playLulus(); // Play sound lulus
+            playLulus();
         } else {
             document.getElementById('status').textContent = 'MOHON MAAF, BELUM LULUS';
             resultDiv.className = 'result tidak-lulus';
