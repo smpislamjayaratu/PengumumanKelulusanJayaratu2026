@@ -158,21 +158,23 @@ function cekKelulusan() {
     resultDiv.style.display = 'none';
     errorP.textContent = '';
 
-    if (nisn.length !== 10) {
+    if (nisn.length!== 10) {
         errorP.textContent = 'NISN harus 10 digit angka.';
         return;
     }
 
-    if (!dataSiswa) {
+    const siswa = dataSiswa[nisn]; // INI YANG KEMARIN SALAH
+
+    if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Cek lagi atau hubungi TU.';
         return;
     }
 
-    document.getElementById('nama').textContent = `Nama: ${dataSiswa.nama}`;
-    document.getElementById('kelas').textContent = `Kelas: ${dataSiswa.kelas}`;
-    document.getElementById('nilai').textContent = dataSiswa.nilai;
+    document.getElementById('nama').textContent = `Nama: ${siswa.nama}`;
+    document.getElementById('kelas').textContent = `Kelas: ${siswa.kelas}`;
+    document.getElementById('nilai').textContent = siswa.nilai;
 
-    if (dataSiswa.status === "LULUS") {
+    if (siswa.status === "LULUS") {
         document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
         resultDiv.className = 'result lulus';
     } else {
