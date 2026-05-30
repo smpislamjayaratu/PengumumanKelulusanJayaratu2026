@@ -62,14 +62,14 @@
         text-align: center;
         display: none;
     }
-  .loading-text {
+.loading-text {
         font-size: 16px;
         font-weight: bold;
         margin-bottom: 15px;
         animation: pulse 1.5s infinite;
         line-height: 1.5;
     }
-  .spinner {
+.spinner {
         border: 4px solid rgba(255,255,255,0.3);
         border-top: 4px solid #fbbc05;
         border-radius: 50%;
@@ -270,7 +270,7 @@ function cekKelulusan() {
         return;
     }
 
-    const siswa = dataSiswa[nisn]; // INI YANG BENER. TADI LUPA [nisn]
+    const siswa = dataSiswa; // <-- INI YANG BENER: PAKE [nisn]
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr';
         return;
