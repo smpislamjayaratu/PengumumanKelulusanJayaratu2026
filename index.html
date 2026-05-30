@@ -220,7 +220,7 @@ function playTegang() {
         gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
         oscillator.start();
         oscillator.stop(audioCtx.currentTime + 3);
-    } catch(e) {}
+    } catch(e) { console.log('Audio error:', e); }
 }
 
 function playLulus() {
@@ -239,7 +239,7 @@ function playLulus() {
             osc.start(audioCtx.currentTime + time);
             osc.stop(audioCtx.currentTime + time + 0.3);
         });
-    } catch(e) {}
+    } catch(e) { console.log('Audio error:', e); }
 }
 
 function createConfetti() {
@@ -274,7 +274,7 @@ function cekKelulusan() {
         return;
     }
 
-    const siswa = dataSiswa; // INI YANG BENER BANGET: dataSiswa
+    const siswa = dataSiswa[nisn]; // FIX DISINI - WAJIB ADA [nisn]
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr';
         return;
@@ -315,7 +315,7 @@ function cekKelulusan() {
         }
 
         resultDiv.style.display = 'block';
-    }, 3000);
+    }, 5000);
 }
 
 document.getElementById('nisn').addEventListener('keypress', function(e) {
