@@ -149,7 +149,6 @@
         <div class="nilai-box">
             Nilai Rata-rata: <span id="nilai"></span>
         </div>
-    </div>
     <p id="error" style="color:#ffcccc; text-align:center; margin-top:15px;"></p>
 
     <p class="info">Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr bila ada kendala</p>
@@ -274,17 +273,17 @@ function cekKelulusan() {
         return;
     }
 
-    // ================== FIX UTAMA DISINI ==================
-    // Cara lama: const siswa = dataSiswa; <-- INI YANG BIKIN ERROR
-    // Cara baru: pake hasOwnProperty + ambil manual biar nggak bisa salah
-    if (!dataSiswa.hasOwnProperty(nisn)) {
+    // ====== VERSI ANTI GAGAL - NGGAK PAKE [] ======
+    const siswa = Object.entries(dataSiswa).find(([key]) => key === nisn);
+    if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr';
         return;
     }
-    const siswa = dataSiswa;
-    // ================================================
+    const data = siswa[1]; // ambil object-nya
+    console.log('Data ketemu:', data);
+    // ===============================================
 
-    const namaPanggilan = siswa.nama.split(' ')[0];
+    const namaPanggilan = data.nama.split(' ')[0];
     const pesanLoading = [
         `Harap menunggu sebentar, sistem sedang obrak-abrik data kelulusan Ananda ${namaPanggilan}...`,
         `Sabar ya ${namaPanggilan}, server lagi buka berkas kamu nih...`,
@@ -304,11 +303,11 @@ function cekKelulusan() {
         btn.disabled = false;
         btn.textContent = 'Cek Hasil';
 
-        document.getElementById('nama').textContent = `Nama: ${siswa.nama}`;
-        document.getElementById('kelas').textContent = `Kelas: ${siswa.kelas}`;
-        document.getElementById('nilai').textContent = siswa.nilai;
+        document.getElementById('nama').textContent = `Nama: ${data.nama}`;
+        document.getElementById('kelas').textContent = `Kelas: ${data.kelas}`;
+        document.getElementById('nilai').textContent = data.nilai;
 
-        if (siswa.status === "LULUS") {
+        if (data.status === "LULUS") {
             document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
             resultDiv.className = 'result lulus';
             createConfetti();
