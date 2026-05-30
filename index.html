@@ -207,35 +207,39 @@ const dataSiswa = {
 };
 
 function playTegang() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.5);
-    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 3);
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(100, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.5);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 3);
+    } catch(e) {}
 }
 
 function playLulus() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const times = [0, 0.1, 0.2, 0.3];
-    const freqs = [523, 659, 784, 1046];
-    times.forEach((time, i) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.frequency.value = freqs[i];
-        gain.gain.setValueAtTime(0.3, audioCtx.currentTime + time);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + time + 0.3);
-        osc.start(audioCtx.currentTime + time);
-        osc.stop(audioCtx.currentTime + time + 0.3);
-    });
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const times = [0, 0.1, 0.2, 0.3];
+        const freqs = [523, 659, 784, 1046];
+        times.forEach((time, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = freqs[i];
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime + time);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + time + 0.3);
+            osc.start(audioCtx.currentTime + time);
+            osc.stop(audioCtx.currentTime + time + 0.3);
+        });
+    } catch(e) {}
 }
 
 function createConfetti() {
@@ -270,7 +274,7 @@ function cekKelulusan() {
         return;
     }
 
-    const siswa = dataSiswa; // <-- INI YANG BENER: PAKE [nisn]
+    const siswa = dataSiswa; // INI YANG BENER BANGET: dataSiswa
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr';
         return;
