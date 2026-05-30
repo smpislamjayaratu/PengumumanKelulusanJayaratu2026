@@ -274,7 +274,10 @@ function cekKelulusan() {
         return;
     }
 
-    const siswa = dataSiswa[nisn]; // FIX DISINI - WAJIB ADA [nisn]
+    // ====== INI BARIS 283 YANG BIKIN ERROR TADI ======
+    const siswa = dataSiswa; // FIX: WAJIB PAKE 
+    // ================================================
+    
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr';
         return;
@@ -315,7 +318,7 @@ function cekKelulusan() {
         }
 
         resultDiv.style.display = 'block';
-    }, 5000);
+    }, 3000);
 }
 
 document.getElementById('nisn').addEventListener('keypress', function(e) {
