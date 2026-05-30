@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pengumuman Kelulusan SMP Islam Jayaratu</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
     body {
         font-family: 'Segoe UI', sans-serif;
@@ -29,23 +28,6 @@
     h1 { text-align: center; margin-bottom: 5px; }
     p.subtitle { text-align: center; opacity: 0.9; margin-bottom: 5px; font-weight: 500; }
     p.tp { text-align: center; opacity: 0.9; margin-bottom: 30px; font-size: 15px; }
-.upload-box {
-        border: 2px dashed rgba(255,255,255,0.5);
-        padding: 30px;
-        border-radius: 15px;
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    input[type="file"] { display: none; }
-.upload-btn {
-        background: #fff;
-        color: #0f9d58;
-        padding: 12px 25px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: bold;
-        display: inline-block;
-    }
     input[type="text"] {
         width: 100%;
         padding: 15px;
@@ -95,68 +77,78 @@
     <p class="subtitle">SMP ISLAM JAYARATU - KELAS 9</p>
     <p class="tp">Tahun Pelajaran 2025/2026</p>
 
-    <div class="upload-box" id="uploadBox">
-        <p><strong>Step 1:</strong> Upload file Excel data siswa</p>
-        <p style="font-size: 13px; opacity: 0.8;">Kolom wajib: NISN, Nama, Kelas, Status, Nilai</p>
-        <label for="excelFile" class="upload-btn">Pilih File Excel</label>
-        <input type="file" id="excelFile" accept=".xlsx,.xls">
-        <p id="fileInfo" style="margin-top: 15px;"></p>
-    </div>
+    <input type="text" id="nisn" placeholder="Masukkan NISN kamu" maxlength="10" inputmode="numeric">
+    <button onclick="cekKelulusan()">Cek Hasil</button>
 
-    <div id="cekSection" style="display:none;">
-        <input type="text" id="nisn" placeholder="Masukkan NISN kamu" maxlength="10" inputmode="numeric">
-        <button onclick="cekKelulusan()">Cek Hasil</button>
-
-        <div id="result" class="result">
-            <h2 id="status"></h2>
-            <p id="nama"></p>
-            <p id="kelas"></p>
-            <div class="nilai-box">
-                Nilai Rata-rata: <span id="nilai"></span>
-            </div>
+    <div id="result" class="result">
+        <h2 id="status"></h2>
+        <p id="nama"></p>
+        <p id="kelas"></p>
+        <div class="nilai-box">
+            Nilai Rata-rata: <span id="nilai"></span>
         </div>
-        <p id="error" style="color:#ffcccc; text-align:center;"></p>
     </div>
+    <p id="error" style="color:#ffcccc; text-align:center; margin-top:15px;"></p>
 
-    <p class="info">Data diproses langsung di browser. Aman.</p>
+    <p class="info">Hubungi TU jika ada kesalahan data.</p>
 </div>
 
 <script>
-let dataSiswa = {};
-
-document.getElementById('excelFile').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    document.getElementById('fileInfo').textContent = `Membaca file: ${file.name}...`;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json(worksheet);
-
-        dataSiswa = {};
-        json.forEach(row => {
-            const nisn = String(row.NISN).trim();
-            if (nisn && nisn.length === 10) {
-                dataSiswa = {
-                    nama: row.Nama,
-                    kelas: row.Kelas,
-                    status: String(row.Status).toUpperCase(),
-                    nilai: row.Nilai || '-'
-                };
-            }
-        });
-
-        document.getElementById('fileInfo').textContent = `✅ Berhasil load ${Object.keys(dataSiswa).length} data siswa`;
-        document.getElementById('cekSection').style.display = 'block';
-        document.getElementById('uploadBox').style.display = 'none';
-    };
-    reader.readAsArrayBuffer(file);
-});
+// ===== TEMPEL DATA SISWA DI SINI =====
+// Format: "NISN": {nama: "NAMA", kelas: "KELAS", status: "LULUS/TIDAK LULUS", nilai: "NILAI"},
+const dataSiswa = {
+  "0097598340": {"nama": "Adelia Fitra Leilani", "kelas": "9A", "status": "LULUS", "nilai": "76,04"},
+  "0105270851": {"nama": "Ahmad Zainuril Mun'im", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0106780446": {"nama": "Akmal Jamalul Umam", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "3118137408": {"nama": "Aksalul Ulum", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0111002724": {"nama": "Alika Maulida Bulqini", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0101882793": {"nama": "Angga Dinar Almursada", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "3112180773": {"nama": "Anisa Hilda", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "3109678762": {"nama": "Ardi Jaenal Pajri", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0107089982": {"nama": "Arfi Husnul Amrillah", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0101571278": {"nama": "Aufi Luthfiah Ramadhani", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0104308970": {"nama": "Beni Sudrajat", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0101487132": {"nama": "Dani Nuradli", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0118979818": {"nama": "Dede Yohana", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "3106106568": {"nama": "Eva Zahira", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0108476264": {"nama": "Fauzan Adzima", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0104401780": {"nama": "Lutfi Abdilah", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "3105873270": {"nama": "Muhamad Ramdan Yusuf Nurjaman", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0104255959": {"nama": "Najma Hoirun Nisa", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0108818586": {"nama": "Naufal Ibtisam Kamil", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "3101602802": {"nama": "Rahma Nabila", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0106262714": {"nama": "Rosalia Dewi Kirana", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "3102309125": {"nama": "Sri Rahayu", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0112641212": {"nama": "Tiyas Zahwa Akila Nurajkia", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0108907840": {"nama": "Wilas Matun Satiroh", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0109547523": {"nama": "Yusup Aprianto", "kelas": "9A", "status": "LULUS", "nilai": ""},
+  "0103222827": {"nama": "Agni Faridatul Istiqomah", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0107476777": {"nama": "Aldo Fikriansyah Putra", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0107383854": {"nama": "Arfa Husnul Amrillah", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "3108991023": {"nama": "Dapa Mandala Putra", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0109536584": {"nama": "Defa Nurafifah", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0104581267": {"nama": "Desra Prida Ismaya", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0095231357": {"nama": "Faiz Fauzan", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0106028830": {"nama": "Kaka Alvin Saputra", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "3106523703": {"nama": "Khaipa Putri", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0095001867": {"nama": "M.Husni Paturohman", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0099209726": {"nama": "Muhammad Syahidan Akhyar", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0101314005": {"nama": "Nida Sabila", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0103863519": {"nama": "Nijma Hoirun Nisa", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0106497045": {"nama": "Oktavia Ainur Bilqis", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0108535418": {"nama": "Raditya", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0104622131": {"nama": "Resti Aoliatul Muhdiat", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0102328157": {"nama": "Salma Latifa", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0093533018": {"nama": "Sendi Ramdani", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0114611129": {"nama": "Siti Lugina", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "3102145238": {"nama": "Syabila Aryani", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0103412296": {"nama": "Syarif Hidayatulloh", "kelas": "9B", "status": "LULUS", "nilai": ""},
+  "0097603197": {"nama": "Widna Khoirunnisa", "kelas": "9B", "status": "LULUS", "nilai": ""}
+},
+    // Tambah data siswa lain di bawah ini, jangan lupa koma di akhir tiap baris kecuali baris terakhir
+    // "NISN_BARU": {nama: "NAMA SISWA", kelas: "9X", status: "LULUS", nilai: "85.00"}
+};
+// ===== BATAS AKHIR TEMPEL DATA =====
 
 function cekKelulusan() {
     const nisn = document.getElementById('nisn').value.trim();
@@ -166,17 +158,21 @@ function cekKelulusan() {
     resultDiv.style.display = 'none';
     errorP.textContent = '';
 
+    if (nisn.length !== 10) {
+        errorP.textContent = 'NISN harus 10 digit angka.';
+        return;
+    }
+
     if (!dataSiswa) {
         errorP.textContent = 'NISN tidak ditemukan. Cek lagi atau hubungi TU.';
         return;
     }
 
-    const siswa = dataSiswa;
-    document.getElementById('nama').textContent = `Nama: ${siswa.nama}`;
-    document.getElementById('kelas').textContent = `Kelas: ${siswa.kelas}`;
-    document.getElementById('nilai').textContent = siswa.nilai;
+    document.getElementById('nama').textContent = `Nama: ${dataSiswa.nama}`;
+    document.getElementById('kelas').textContent = `Kelas: ${dataSiswa.kelas}`;
+    document.getElementById('nilai').textContent = dataSiswa.nilai;
 
-    if (siswa.status === "LULUS") {
+    if (dataSiswa.status === "LULUS") {
         document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
         resultDiv.className = 'result lulus';
     } else {
