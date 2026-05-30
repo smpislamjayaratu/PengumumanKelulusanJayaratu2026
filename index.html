@@ -94,61 +94,55 @@
 </div>
 
 <script>
-// ===== TEMPEL DATA SISWA DI SINI =====
-// Format: "NISN": {nama: "NAMA", kelas: "KELAS", status: "LULUS/TIDAK LULUS", nilai: "NILAI"},
 const dataSiswa = {
   "0097598340": {"nama": "Adelia Fitra Leilani", "kelas": "9A", "status": "LULUS", "nilai": "76,04"},
-  "0105270851": {"nama": "Ahmad Zainuril Mun'im", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0106780446": {"nama": "Akmal Jamalul Umam", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "3118137408": {"nama": "Aksalul Ulum", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0111002724": {"nama": "Alika Maulida Bulqini", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0101882793": {"nama": "Angga Dinar Almursada", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "3112180773": {"nama": "Anisa Hilda", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "3109678762": {"nama": "Ardi Jaenal Pajri", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0107089982": {"nama": "Arfi Husnul Amrillah", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0101571278": {"nama": "Aufi Luthfiah Ramadhani", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0104308970": {"nama": "Beni Sudrajat", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0101487132": {"nama": "Dani Nuradli", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0118979818": {"nama": "Dede Yohana", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "3106106568": {"nama": "Eva Zahira", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0108476264": {"nama": "Fauzan Adzima", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0104401780": {"nama": "Lutfi Abdilah", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "3105873270": {"nama": "Muhamad Ramdan Yusuf Nurjaman", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0104255959": {"nama": "Najma Hoirun Nisa", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0108818586": {"nama": "Naufal Ibtisam Kamil", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "3101602802": {"nama": "Rahma Nabila", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0106262714": {"nama": "Rosalia Dewi Kirana", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "3102309125": {"nama": "Sri Rahayu", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0112641212": {"nama": "Tiyas Zahwa Akila Nurajkia", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0108907840": {"nama": "Wilas Matun Satiroh", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0109547523": {"nama": "Yusup Aprianto", "kelas": "9A", "status": "LULUS", "nilai": ""},
-  "0103222827": {"nama": "Agni Faridatul Istiqomah", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0107476777": {"nama": "Aldo Fikriansyah Putra", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0107383854": {"nama": "Arfa Husnul Amrillah", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "3108991023": {"nama": "Dapa Mandala Putra", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0109536584": {"nama": "Defa Nurafifah", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0104581267": {"nama": "Desra Prida Ismaya", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0095231357": {"nama": "Faiz Fauzan", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0106028830": {"nama": "Kaka Alvin Saputra", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "3106523703": {"nama": "Khaipa Putri", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0095001867": {"nama": "M.Husni Paturohman", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0099209726": {"nama": "Muhammad Syahidan Akhyar", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0101314005": {"nama": "Nida Sabila", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0103863519": {"nama": "Nijma Hoirun Nisa", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0106497045": {"nama": "Oktavia Ainur Bilqis", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0108535418": {"nama": "Raditya", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0104622131": {"nama": "Resti Aoliatul Muhdiat", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0102328157": {"nama": "Salma Latifa", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0093533018": {"nama": "Sendi Ramdani", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0114611129": {"nama": "Siti Lugina", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "3102145238": {"nama": "Syabila Aryani", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0103412296": {"nama": "Syarif Hidayatulloh", "kelas": "9B", "status": "LULUS", "nilai": ""},
-  "0097603197": {"nama": "Widna Khoirunnisa", "kelas": "9B", "status": "LULUS", "nilai": ""}
-},
-    // Tambah data siswa lain di bawah ini, jangan lupa koma di akhir tiap baris kecuali baris terakhir
-    // "NISN_BARU": {nama: "NAMA SISWA", kelas: "9X", status: "LULUS", nilai: "85.00"}
+  "0105270851": {"nama": "Ahmad Zainuril Mun'im", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0106780446": {"nama": "Akmal Jamalul Umam", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "3118137408": {"nama": "Aksalul Ulum", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0111002724": {"nama": "Alika Maulida Bulqini", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0101882793": {"nama": "Angga Dinar Almursada", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "3112180773": {"nama": "Anisa Hilda", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "3109678762": {"nama": "Ardi Jaenal Pajri", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0107089982": {"nama": "Arfi Husnul Amrillah", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0101571278": {"nama": "Aufi Luthfiah Ramadhani", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0104308970": {"nama": "Beni Sudrajat", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0101487132": {"nama": "Dani Nuradli", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0118979818": {"nama": "Dede Yohana", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "3106106568": {"nama": "Eva Zahira", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0108476264": {"nama": "Fauzan Adzima", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0104401780": {"nama": "Lutfi Abdilah", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "3105873270": {"nama": "Muhamad Ramdan Yusuf Nurjaman", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0104255959": {"nama": "Najma Hoirun Nisa", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0108818586": {"nama": "Naufal Ibtisam Kamil", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "3101602802": {"nama": "Rahma Nabila", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0106262714": {"nama": "Rosalia Dewi Kirana", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "3102309125": {"nama": "Sri Rahayu", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0112641212": {"nama": "Tiyas Zahwa Akila Nurajkia", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0108907840": {"nama": "Wilas Matun Satiroh", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0109547523": {"nama": "Yusup Aprianto", "kelas": "9A", "status": "LULUS", "nilai": "-"},
+  "0103222827": {"nama": "Agni Faridatul Istiqomah", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0107476777": {"nama": "Aldo Fikriansyah Putra", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0107383854": {"nama": "Arfa Husnul Amrillah", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "3108991023": {"nama": "Dapa Mandala Putra", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0109536584": {"nama": "Defa Nurafifah", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0104581267": {"nama": "Desra Prida Ismaya", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0095231357": {"nama": "Faiz Fauzan", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0106028830": {"nama": "Kaka Alvin Saputra", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "3106523703": {"nama": "Khaipa Putri", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0095001867": {"nama": "M.Husni Paturohman", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0099209726": {"nama": "Muhammad Syahidan Akhyar", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0101314005": {"nama": "Nida Sabila", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0103863519": {"nama": "Nijma Hoirun Nisa", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0106497045": {"nama": "Oktavia Ainur Bilqis", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0108535418": {"nama": "Raditya", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0104622131": {"nama": "Resti Aoliatul Muhdiat", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0102328157": {"nama": "Salma Latifa", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0093533018": {"nama": "Sendi Ramdani", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0114611129": {"nama": "Siti Lugina", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "3102145238": {"nama": "Syabila Aryani", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0103412296": {"nama": "Syarif Hidayatulloh", "kelas": "9B", "status": "LULUS", "nilai": "-"},
+  "0097603197": {"nama": "Widna Khoirunnisa", "kelas": "9B", "status": "LULUS", "nilai": "-"}
 };
-// ===== BATAS AKHIR TEMPEL DATA =====
 
 function cekKelulusan() {
     const nisn = document.getElementById('nisn').value.trim();
@@ -163,7 +157,7 @@ function cekKelulusan() {
         return;
     }
 
-    const siswa = dataSiswa[nisn]; // INI YANG KEMARIN SALAH
+    const siswa = dataSiswa[nisn];
 
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Cek lagi atau hubungi TU.';
