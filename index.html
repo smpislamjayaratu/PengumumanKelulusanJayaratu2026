@@ -17,7 +17,7 @@
         margin: 0;
         overflow-x: hidden;
     }
-.container {
+   .container {
         background: rgba(255,255,255,0.15);
         backdrop-filter: blur(15px);
         padding: 40px;
@@ -57,19 +57,19 @@
     button:hover { opacity: 0.9; transform: scale(1.02); }
     button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-.loading {
+   .loading {
         margin-top: 25px;
         text-align: center;
         display: none;
     }
-.loading-text {
+   .loading-text {
         font-size: 16px;
         font-weight: bold;
         margin-bottom: 15px;
         animation: pulse 1.5s infinite;
         line-height: 1.5;
     }
-.spinner {
+   .spinner {
         border: 4px solid rgba(255,255,255,0.3);
         border-top: 4px solid #fbbc05;
         border-radius: 50%;
@@ -87,7 +87,7 @@
         50% { opacity: 0.6; }
     }
 
-.result {
+   .result {
         margin-top: 25px;
         padding: 25px;
         border-radius: 15px;
@@ -99,19 +99,30 @@
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
-.lulus { background: #0f9d58; }
-.tidak-lulus { background: #db4437; }
-.nilai-box {
+   .lulus { background: #0f9d58; }
+   .lulus-bersyarat { background: #fbbc05; color: #333; } /* WARNA KUNING BROH */
+   .tidak-lulus { background: #db4437; }
+   .nilai-box {
         background: rgba(255,255,255,0.2);
         padding: 15px;
         border-radius: 10px;
         margin-top: 15px;
         font-size: 20px;
         font-weight: bold;
- }
-.info { font-size: 14px; opacity: 0.8; text-align: center; margin-top: 20px; }
+    }
+   .catatan-box {
+        background: rgba(0,0,0,0.15);
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-size: 14px;
+        text-align: left;
+        line-height: 1.4;
+    }
+   .lulus-bersyarat.catatan-box { background: rgba(0,0,0,0.1); }
+   .info { font-size: 14px; opacity: 0.8; text-align: center; margin-top: 20px; }
 
-.confetti {
+   .confetti {
         position: fixed;
         width: 10px;
         height: 10px;
@@ -149,6 +160,7 @@
         <div class="nilai-box">
             Nilai Rata-rata: <span id="nilai"></span>
         </div>
+        <div id="catatan" class="catatan-box" style="display:none;"></div>
     </div>
     <p id="error" style="color:#ffcccc; text-align:center; margin-top:15px;"></p>
 
@@ -207,7 +219,7 @@ const dataSiswa = {
 };
 
 // ===== SETTING JAM BUKA KELULUSAN =====
-const TANGGAL_BUKA = new Date('2026-06-02T18:00:00+07:00'); // Selasa, 2 Juni 2026 Jam 18.00 WIB
+const TANGGAL_BUKA = new Date('2026-06-01T20:00:00+07:00'); // 1 Juni 2026 Jam 20.00 WIB
 // ======================================
 
 function playTegang() {
@@ -262,28 +274,6 @@ function createConfetti() {
     }
 }
 
-// AMBIL WAKTU DARI 2 SERVER BIAR AMAN
-async function getWaktuServer() {
-    const apis = [
-        'https://worldtimeapi.org/api/timezone/Asia/Jakarta',
-        'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Jakarta'
-    ];
-
-    for (let url of apis) {
-        try {
-            const res = await fetch(url, {cache: 'no-store'});
-            const data = await res.json();
-            // worldtimeapi pake.datetime, timeapi.io pake.dateTime
-            const waktu = data.datetime || data.dateTime;
-            return new Date(waktu);
-        } catch (e) {
-            console.log('API gagal:', url);
-            continue;
-        }
-    }
-    throw new Error('Semua server waktu down');
-}
-
 async function cekKelulusan() {
     const nisn = document.getElementById('nisn').value.trim();
     const resultDiv = document.getElementById('result');
@@ -291,8 +281,10 @@ async function cekKelulusan() {
     const loadingText = document.getElementById('loadingText');
     const errorP = document.getElementById('error');
     const btn = document.getElementById('btnCek');
+    const catatanDiv = document.getElementById('catatan');
 
     resultDiv.style.display = 'none';
+    catatanDiv.style.display = 'none';
     errorP.textContent = '';
     btn.disabled = true;
     btn.textContent = 'Cek waktu server...';
@@ -306,11 +298,9 @@ async function cekKelulusan() {
 
     let waktuServer;
     try {
-        // PAKE 3 API SEKALIGUS BIAR NGGAK ADA ALASAN GAGAL
         const apis = [
             'https://worldtimeapi.org/api/timezone/Asia/Jakarta',
-            'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Jakarta',
-            'https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Jakarta'
+            'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Jakarta'
         ];
 
         for (let url of apis) {
@@ -319,7 +309,7 @@ async function cekKelulusan() {
                 const data = await res.json();
                 const waktuStr = data.datetime || data.dateTime;
                 waktuServer = new Date(waktuStr);
-                if (!isNaN(waktuServer)) break; // kalo valid, stop loop
+                if (!isNaN(waktuServer)) break;
             } catch (e) {
                 console.log('API gagal:', url, e);
                 continue;
@@ -340,14 +330,6 @@ async function cekKelulusan() {
         return;
     }
 
-    // DEBUG: LIAT DI CONSOLE F12
-    console.log('Waktu Server:', waktuServer.toString());
-    console.log('Waktu Buka:', TANGGAL_BUKA.toString());
-    console.log('Waktu Server MS:', waktuServer.getTime());
-    console.log('Waktu Buka MS:', TANGGAL_BUKA.getTime());
-    console.log('Hasil Cek:', waktuServer.getTime() < TANGGAL_BUKA.getTime());
-
-    // BANDINGIN PAKE MILISECOND BIAR NGGAK NGACO
     if (waktuServer.getTime() < TANGGAL_BUKA.getTime()) {
         const options = {
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
@@ -367,7 +349,6 @@ async function cekKelulusan() {
         return;
     }
 
-    // KALO UDAH LEWAT JAM BUKA, LANJUT CEK NISN + LOADING 1 MENIT
     const siswa = Object.entries(dataSiswa).find(([key]) => key === nisn);
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Operator Sekolah';
@@ -398,16 +379,6 @@ async function cekKelulusan() {
             `${namaPanggilan}... Ini data kelulusan kamu atau surat cinta? Kok adminnya baca lama banget...`,
             `Breaking News ${namaPanggilan}: Nilai kamu lagi dirapatin guru se-sekolah. Voting dulu...`,
             `Hasilnya udah di depan mata ${namaPanggilan}... Tapi disuruh iklan dulu 30 detik...`
-        ],
-        [
-            `Sebentar ${namaPanggilan}, Pak Kepsek lagi sujud syukur atau sujud nyesel baca nilai kamu...`,
-            `${namaPanggilan} inget nggak pernah nggak ngerjain PR? Itu lagi dihitung dosanya...`,
-            `Alhamdulillah ${namaPanggilan}... Data udah ketemu. Tinggal tanda tangan wali kelas yang lagi cuti...`
-        ],
-        [
-            `${namaPanggilan} sabar ya... Data kamu sama kayak mantan, susah diikhlasin server...`,
-            `Admin lagi galau ${namaPanggilan}, nilai kamu ngingetin dia sama kenangan pas UN...`,
-            `Udah ${namaPanggilan}... Lupakan mantan, fokus masa depan. Hasilnya udah di sini nih...`
         ]
     ];
 
@@ -440,19 +411,30 @@ async function cekKelulusan() {
         document.getElementById('kelas').textContent = `Kelas: ${data.kelas}`;
         document.getElementById('nilai').textContent = data.nilai;
 
-        if (data.status === "LULUS") {
+        // NORMALISASI STATUS BIAR ANTI TYPO
+        const statusNormal = data.status.trim().toUpperCase();
+
+        if (statusNormal === "LULUS") {
             document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
             resultDiv.className = 'result lulus';
+            catatanDiv.innerHTML = '<b>Catatan:</b> Alhamdulillah. Silakan ambil SKL di TU mulai 3 Juni 2026.';
+            catatanDiv.style.display = 'block';
             createConfetti();
             playLulus();
-        } else if (data.status === "LULUS BERSYARAT") {
-            document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS BERSYARAT ⚠️';
-            resultDiv.className = 'result lulus';
-            createConfetti();
+        }
+        else if (statusNormal === "LULUS BERSYARAT") {
+            document.getElementById('status').textContent = 'ANDA DINYATAKAN LULUS BERSYARAT ⚠️';
+            resultDiv.className = 'result lulus-bersyarat';
+            catatanDiv.innerHTML = '<b>Catatan Penting:</b> Siswa wajib menyelesaikan pembinaan/administrasi. Segera hubungi Wali Kelas 9 paling lambat 5 Juni 2026. Tetap semangat!';
+            catatanDiv.style.display = 'block';
+            createConfetti(); // TETEP KASIH CONFETTI BIAR SEMANGAT
             playLulus();
-        } else {
+        }
+        else {
             document.getElementById('status').textContent = 'MOHON MAAF, BELUM LULUS';
             resultDiv.className = 'result tidak-lulus';
+            catatanDiv.innerHTML = '<b>Catatan:</b> Tetap semangat. Silakan hubungi BK untuk konsultasi langkah selanjutnya.';
+            catatanDiv.style.display = 'block';
         }
 
         resultDiv.style.display = 'block';
