@@ -288,7 +288,6 @@ function cekKelulusan() {
     btn.textContent = 'Memproses...';
     playTegang();
 
-    // 5 PAKET LOADING GREGET - RANDOM TIAP SISWA
     const semuaPaket = [
         [
             `Tenang ${namaPanggilan}... Jantung aman kan? Server lagi nyari nama kamu di tumpukan berkas...`,
@@ -319,22 +318,21 @@ function cekKelulusan() {
 
     const paketTerpilih = semuaPaket[Math.floor(Math.random() * semuaPaket.length)];
     let detik = 60;
-    loadingText.textContent = `${paketTerpilih[0]} ${detik} detik lagi`;
 
     const countdown = setInterval(() => {
-        detik--;
-
-        if (detik > 40) {
+        // INI YANG BENER: PAKE >= BIAR PAS DETIK 40 & 20 KE GANTI
+        if (detik >= 41) {
             loadingText.textContent = `${paketTerpilih[0]} ${detik} detik lagi`;
-        } else if (detik > 20) {
+        } else if (detik >= 21) {
             loadingText.textContent = `${paketTerpilih[1]} ${detik} detik lagi`;
-        } else if (detik > 5) {
+        } else if (detik >= 6) {
             loadingText.textContent = `${paketTerpilih[2]} ${detik} detik lagi`;
         } else {
             loadingText.textContent = `DETEKSI KERINGAT DINGIN ${namaPanggilan}! ${detik}...`;
         }
 
-        if (detik <= 0) clearInterval(countdown);
+        detik--;
+        if (detik < 0) clearInterval(countdown);
     }, 1000);
 
     setTimeout(() => {
@@ -360,7 +358,6 @@ function cekKelulusan() {
         resultDiv.style.display = 'block';
     }, 60000);
 }
-
 document.getElementById('nisn').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') cekKelulusan();
 });
