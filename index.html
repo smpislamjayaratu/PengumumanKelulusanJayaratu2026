@@ -304,41 +304,70 @@ async function cekKelulusan() {
         return;
     }
 
-    let sekarang;
+    let waktuServer;
     try {
-        sekarang = await getWaktuServer();
+        // PAKE 3 API SEKALIGUS BIAR NGGAK ADA ALASAN GAGAL
+        const apis = [
+            'https://worldtimeapi.org/api/timezone/Asia/Jakarta',
+            'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Jakarta',
+            'https://www.timeapi.io/api/Time/current/zone?timeZone=Asia/Jakarta'
+        ];
+
+        for (let url of apis) {
+            try {
+                const res = await fetch(url, {cache: 'no-store'});
+                const data = await res.json();
+                const waktuStr = data.datetime || data.dateTime;
+                waktuServer = new Date(waktuStr);
+                if (!isNaN(waktuServer)) break; // kalo valid, stop loop
+            } catch (e) {
+                console.log('API gagal:', url, e);
+                continue;
+            }
+        }
+
+        if (!waktuServer || isNaN(waktuServer)) throw new Error('Semua API waktu mati');
+
     } catch (e) {
-        // KALO 2 API MATI SEMUA, TETEP BLOKIR AJA BIAR AMAN
+        console.log('ERROR TOTAL:', e);
         errorP.innerHTML = `
-            ⏳ <b>AKSES DITUTUP SEMENTARA</b><br>
-            Server waktu lagi gangguan. Coba lagi 1 menit.<br>
-            <small>Demi keamanan, akses dikunci kalo waktu nggak bisa diverifikasi.</small>
+            ⏳ <b>AKSES DIKUNCI SEMENTARA</b><br>
+            Server waktu lagi gangguan. Refresh 1 menit lagi.<br>
+            <small>Demi keamanan, sistem nggak bisa dibuka kalo waktu nggak ke-cek.</small>
         `;
         btn.disabled = false;
         btn.textContent = 'Cek Hasil';
         return;
     }
 
-    if (sekarang < TANGGAL_BUKA) {
+    // DEBUG: LIAT DI CONSOLE F12
+    console.log('Waktu Server:', waktuServer.toString());
+    console.log('Waktu Buka:', TANGGAL_BUKA.toString());
+    console.log('Waktu Server MS:', waktuServer.getTime());
+    console.log('Waktu Buka MS:', TANGGAL_BUKA.getTime());
+    console.log('Hasil Cek:', waktuServer.getTime() < TANGGAL_BUKA.getTime());
+
+    // BANDINGIN PAKE MILISECOND BIAR NGGAK NGACO
+    if (waktuServer.getTime() < TANGGAL_BUKA.getTime()) {
         const options = {
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
             hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'
         };
         const waktuBuka = TANGGAL_BUKA.toLocaleDateString('id-ID', options) + ' WIB';
-        const waktuServer = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
+        const waktuServerStr = waktuServer.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
 
         errorP.innerHTML = `
             ⏳ <b>BELUM WAKTUNYA DEK!</b><br>
             Akses dibuka: <b>${waktuBuka}</b><br><br>
-            Waktu server sekarang: ${waktuServer} WIB<br>
-            <small>Mundurin jam HP + matiin internet nggak mempan 😏</small>
+            Waktu server sekarang: ${waktuServerStr} WIB<br>
+            <small>Mundurin jam HP + matiin internet nggak mempan. Coba aja 😏</small>
         `;
         btn.disabled = false;
         btn.textContent = 'Cek Hasil';
         return;
     }
 
-    // LANJUT CEK NISN + LOADING 1 MENIT
+    // KALO UDAH LEWAT JAM BUKA, LANJUT CEK NISN + LOADING 1 MENIT
     const siswa = Object.entries(dataSiswa).find(([key]) => key === nisn);
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Operator Sekolah';
