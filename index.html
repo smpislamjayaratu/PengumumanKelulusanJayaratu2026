@@ -149,6 +149,7 @@
         <div class="nilai-box">
             Nilai Rata-rata: <span id="nilai"></span>
         </div>
+    </div>
     <p id="error" style="color:#ffcccc; text-align:center; margin-top:15px;"></p>
 
     <p class="info">Silahkan Hubungi Bapak Yandi Sastria Syukrillah, SE., Gr bila ada kendala</p>
@@ -257,6 +258,7 @@ function createConfetti() {
     }
 }
 
+// ===== FUNGSI UDAH GUE UPDATE JADI 1 MENIT + COUNTDOWN =====
 function cekKelulusan() {
     const nisn = document.getElementById('nisn').value.trim();
     const resultDiv = document.getElementById('result');
@@ -273,32 +275,33 @@ function cekKelulusan() {
         return;
     }
 
-    // ====== VERSI ANTI GAGAL - NGGAK PAKE [] ======
     const siswa = Object.entries(dataSiswa).find(([key]) => key === nisn);
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Operator Sekolah';
         return;
     }
-    const data = siswa[1]; // ambil object-nya
+    const data = siswa[1];
     console.log('Data ketemu:', data);
-    // ===============================================
 
     const namaPanggilan = data.nama.split(' ')[0];
-    const pesanLoading = [
-        `Harap menunggu sebentar, sistem sedang obrak-abrik data kelulusan Ananda ${namaPanggilan}...`,
-        `Sabar ya ${namaPanggilan}, server lagi buka berkas kamu nih...`,
-        `Siapkan cemilan Ananda ${namaPanggilan} sembari menunggu hasil...`,
-        `Jantung aman kan ${namaPanggilan}? Tunggu 3 detik ya...`
-    ];
-    loadingText.textContent = pesanLoading[Math.floor(Math.random() * pesanLoading.length)];
 
     loadingDiv.style.display = 'block';
     btn.disabled = true;
     btn.textContent = 'Memproses...';
-
     playTegang();
 
+    // INI BAGIAN COUNTDOWN 1 MENIT BROH
+    let detik = 60;
+    loadingText.textContent = `Sabar ya ${namaPanggilan}... Server lagi buka berkas kamu. ${detik} detik lagi...`;
+
+    const countdown = setInterval(() => {
+        detik--;
+        loadingText.textContent = `Sabar ya ${namaPanggilan}... Server lagi buka berkas kamu. ${detik} detik lagi...`;
+        if (detik <= 0) clearInterval(countdown);
+    }, 1000);
+
     setTimeout(() => {
+        clearInterval(countdown);
         loadingDiv.style.display = 'none';
         btn.disabled = false;
         btn.textContent = 'Cek Hasil';
@@ -318,7 +321,7 @@ function cekKelulusan() {
         }
 
         resultDiv.style.display = 'block';
-    }, 3000);
+    }, 60000); // 1 MENIT = 60000 MILIDETIK
 }
 
 document.getElementById('nisn').addEventListener('keypress', function(e) {
