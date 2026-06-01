@@ -206,6 +206,10 @@ const dataSiswa = {
   "0097603197": {"nama": "Widna Khoirunnisa", "kelas": "9B", "status": "LULUS", "nilai": "72,65"}
 };
 
+// ===== SETTING JAM BUKA KELULUSAN =====
+const TANGGAL_BUKA = new Date('2026-06-02T18:00:00+07:00'); // Selasa, 2 Juni 2026 Jam 18.00 WIB
+// ======================================
+
 function playTegang() {
     try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -258,8 +262,8 @@ function createConfetti() {
     }
 }
 
-// ===== VERSI FINAL: 1 MENIT + 5 PAKET RANDOM + JUMPSCARE =====
-function cekKelulusan() {
+// ===== VERSI FINAL: KUNCI WAKTU SERVER + 1 MENIT + 5 PAKET RANDOM + JUMPSCARE =====
+async function cekKelulusan() {
     const nisn = document.getElementById('nisn').value.trim();
     const resultDiv = document.getElementById('result');
     const loadingDiv = document.getElementById('loading');
@@ -269,22 +273,65 @@ function cekKelulusan() {
 
     resultDiv.style.display = 'none';
     errorP.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Sinkronisasi waktu...';
 
     if (nisn.length!== 10) {
         errorP.textContent = 'NISN harus 10 digit angka.';
+        btn.disabled = false;
+        btn.textContent = 'Cek Hasil';
         return;
     }
 
+    try {
+        // AMBIL WAKTU ASLI DARI SERVER, BUKAN HP USER
+        const res = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jakarta');
+        if (!res.ok) throw new Error('Server waktu error');
+        const dataWaktu = await res.json();
+        const sekarang = new Date(dataWaktu.datetime);
+
+        if (sekarang < TANGGAL_BUKA) {
+            const options = {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'
+            };
+            const waktuBuka = TANGGAL_BUKA.toLocaleDateString('id-ID', options) + ' WIB';
+            const waktuServer = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
+
+            errorP.innerHTML = `
+                ⏳ <b>BELUM WAKTUNYA DEK!</b><br>
+                Akses dibuka: <b>${waktuBuka}</b><br><br>
+                Waktu server sekarang: ${waktuServer} WIB<br>
+                <small>Mundurin jam HP nggak mempan. Server yang megang kendali 😏</small>
+            `;
+            btn.disabled = false;
+            btn.textContent = 'Cek Hasil';
+            return;
+        }
+    } catch (e) {
+        errorP.innerHTML = `
+            ❌ <b>Gagal cek waktu server</b><br>
+            Pastikan internet kamu nyala terus coba lagi.<br>
+            <small>Kalo masih error, hubungi operator sekolah ya.</small>
+        `;
+        btn.disabled = false;
+        btn.textContent = 'Cek Hasil';
+        return;
+    }
+
+    // KALO UDAH LEWAT JAM BUKA, LANJUT CEK NISN + LOADING 1 MENIT
     const siswa = Object.entries(dataSiswa).find(([key]) => key === nisn);
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Operator Sekolah';
+        btn.disabled = false;
+        btn.textContent = 'Cek Hasil';
         return;
     }
+
     const data = siswa[1];
     const namaPanggilan = data.nama.split(' ')[0];
 
     loadingDiv.style.display = 'block';
-    btn.disabled = true;
     btn.textContent = 'Memproses...';
     playTegang();
 
@@ -318,13 +365,10 @@ function cekKelulusan() {
 
     const paketTerpilih = semuaPaket[Math.floor(Math.random() * semuaPaket.length)];
     let detik = 60;
-
-    // SET TEKS PERTAMA LANGSUNG BIAR NGGAK KOSONG 1 DETIK
     loadingText.textContent = `${paketTerpilih[0]} ${detik} detik lagi`;
 
     const countdown = setInterval(() => {
-        detik--; // KURANGIN DULU BARU CEK
-
+        detik--;
         if (detik >= 41) {
             loadingText.textContent = `${paketTerpilih[0]} ${detik} detik lagi`;
         } else if (detik >= 21) {
@@ -350,6 +394,11 @@ function cekKelulusan() {
 
         if (data.status === "LULUS") {
             document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS 🎉';
+            resultDiv.className = 'result lulus';
+            createConfetti();
+            playLulus();
+        } else if (data.status === "LULUS BERSYARAT") {
+            document.getElementById('status').textContent = 'SELAMAT! KAMU LULUS BERSYARAT ⚠️';
             resultDiv.className = 'result lulus';
             createConfetti();
             playLulus();
