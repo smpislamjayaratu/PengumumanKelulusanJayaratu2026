@@ -258,7 +258,7 @@ function createConfetti() {
     }
 }
 
-// ===== FUNGSI UDAH GUE UPDATE JADI 1 MENIT + COUNTDOWN =====
+// ===== VERSI FINAL: 1 MENIT + 5 PAKET RANDOM + JUMPSCARE =====
 function cekKelulusan() {
     const nisn = document.getElementById('nisn').value.trim();
     const resultDiv = document.getElementById('result');
@@ -281,8 +281,6 @@ function cekKelulusan() {
         return;
     }
     const data = siswa[1];
-    console.log('Data ketemu:', data);
-
     const namaPanggilan = data.nama.split(' ')[0];
 
     loadingDiv.style.display = 'block';
@@ -290,13 +288,52 @@ function cekKelulusan() {
     btn.textContent = 'Memproses...';
     playTegang();
 
-    // INI BAGIAN COUNTDOWN 1 MENIT BROH
+    // 5 PAKET LOADING GREGET - RANDOM TIAP SISWA
+    const semuaPaket = [
+        [
+            `Tenang ${namaPanggilan}... Jantung aman kan? Server lagi nyari nama kamu di tumpukan berkas...`,
+            `Buset ${namaPanggilan}, berkas kamu tebel banget. Tunggu ya, admin lagi ngopi dulu biar kuat...`,
+            `UDAH KETEMU ${namaPanggilan}! Tinggal print... Eh tintanya habis. Bentar isi dulu...`
+        ],
+        [
+            `${namaPanggilan} udah wudhu belum? Server lagi istikharah dulu nih nentuin kamu lulus apa nggak...`,
+            `Kata server: "${namaPanggilan} nilainya nanggung". Lagi dibulatkan ke atas atau ke bawah ya...`,
+            `PLOT TWIST ${namaPanggilan}... Data kamu nyangkut di awan. Lagi manggil pawang hujan...`
+        ],
+        [
+            `${namaPanggilan}... Ini data kelulusan kamu atau surat cinta? Kok adminnya baca lama banget...`,
+            `Breaking News ${namaPanggilan}: Nilai kamu lagi dirapatin guru se-sekolah. Voting dulu...`,
+            `Hasilnya udah di depan mata ${namaPanggilan}... Tapi disuruh iklan dulu 30 detik...`
+        ],
+        [
+            `Sebentar ${namaPanggilan}, Pak Kepsek lagi sujud syukur atau sujud nyesel baca nilai kamu...`,
+            `${namaPanggilan} inget nggak pernah nggak ngerjain PR? Itu lagi dihitung dosanya...`,
+            `Alhamdulillah ${namaPanggilan}... Data udah ketemu. Tinggal tanda tangan wali kelas yang lagi cuti...`
+        ],
+        [
+            `${namaPanggilan} sabar ya... Data kamu sama kayak mantan, susah diikhlasin server...`,
+            `Admin lagi galau ${namaPanggilan}, nilai kamu ngingetin dia sama kenangan pas UN...`,
+            `Udah ${namaPanggilan}... Lupakan mantan, fokus masa depan. Hasilnya udah di sini nih...`
+        ]
+    ];
+
+    const paketTerpilih = semuaPaket[Math.floor(Math.random() * semuaPaket.length)];
     let detik = 60;
-    loadingText.textContent = `Sabar ya ${namaPanggilan}... Server lagi buka berkas kamu. ${detik} detik lagi...`;
+    loadingText.textContent = `${paketTerpilih[0]} ${detik} detik lagi`;
 
     const countdown = setInterval(() => {
         detik--;
-        loadingText.textContent = `Sabar ya ${namaPanggilan}... Server lagi buka berkas kamu. ${detik} detik lagi...`;
+
+        if (detik > 40) {
+            loadingText.textContent = `${paketTerpilih[0]} ${detik} detik lagi`;
+        } else if (detik > 20) {
+            loadingText.textContent = `${paketTerpilih[1]} ${detik} detik lagi`;
+        } else if (detik > 5) {
+            loadingText.textContent = `${paketTerpilih[2]} ${detik} detik lagi`;
+        } else {
+            loadingText.textContent = `DETEKSI KERINGAT DINGIN ${namaPanggilan}! ${detik}...`;
+        }
+
         if (detik <= 0) clearInterval(countdown);
     }, 1000);
 
@@ -321,7 +358,7 @@ function cekKelulusan() {
         }
 
         resultDiv.style.display = 'block';
-    }, 60000); // 1 MENIT = 60000 MILIDETIK
+    }, 60000);
 }
 
 document.getElementById('nisn').addEventListener('keypress', function(e) {
