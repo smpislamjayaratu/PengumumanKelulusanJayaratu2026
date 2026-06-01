@@ -262,7 +262,28 @@ function createConfetti() {
     }
 }
 
-// ===== VERSI FINAL: KUNCI WAKTU SERVER + 1 MENIT + 5 PAKET RANDOM + JUMPSCARE =====
+// AMBIL WAKTU DARI 2 SERVER BIAR AMAN
+async function getWaktuServer() {
+    const apis = [
+        'https://worldtimeapi.org/api/timezone/Asia/Jakarta',
+        'https://timeapi.io/api/Time/current/zone?timeZone=Asia/Jakarta'
+    ];
+
+    for (let url of apis) {
+        try {
+            const res = await fetch(url, {cache: 'no-store'});
+            const data = await res.json();
+            // worldtimeapi pake.datetime, timeapi.io pake.dateTime
+            const waktu = data.datetime || data.dateTime;
+            return new Date(waktu);
+        } catch (e) {
+            console.log('API gagal:', url);
+            continue;
+        }
+    }
+    throw new Error('Semua server waktu down');
+}
+
 async function cekKelulusan() {
     const nisn = document.getElementById('nisn').value.trim();
     const resultDiv = document.getElementById('result');
@@ -274,7 +295,7 @@ async function cekKelulusan() {
     resultDiv.style.display = 'none';
     errorP.textContent = '';
     btn.disabled = true;
-    btn.textContent = 'Sinkronisasi waktu...';
+    btn.textContent = 'Cek waktu server...';
 
     if (nisn.length!== 10) {
         errorP.textContent = 'NISN harus 10 digit angka.';
@@ -283,43 +304,41 @@ async function cekKelulusan() {
         return;
     }
 
+    let sekarang;
     try {
-        // AMBIL WAKTU ASLI DARI SERVER, BUKAN HP USER
-        const res = await fetch('https://worldtimeapi.org/api/timezone/Asia/Jakarta');
-        if (!res.ok) throw new Error('Server waktu error');
-        const dataWaktu = await res.json();
-        const sekarang = new Date(dataWaktu.datetime);
-
-        if (sekarang < TANGGAL_BUKA) {
-            const options = {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'
-            };
-            const waktuBuka = TANGGAL_BUKA.toLocaleDateString('id-ID', options) + ' WIB';
-            const waktuServer = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
-
-            errorP.innerHTML = `
-                ⏳ <b>BELUM WAKTUNYA DEK!</b><br>
-                Akses dibuka: <b>${waktuBuka}</b><br><br>
-                Waktu server sekarang: ${waktuServer} WIB<br>
-                <small>Mundurin jam HP nggak mempan. Server yang megang kendali 😏</small>
-            `;
-            btn.disabled = false;
-            btn.textContent = 'Cek Hasil';
-            return;
-        }
+        sekarang = await getWaktuServer();
     } catch (e) {
+        // KALO 2 API MATI SEMUA, TETEP BLOKIR AJA BIAR AMAN
         errorP.innerHTML = `
-            ❌ <b>Gagal cek waktu server</b><br>
-            Pastikan internet kamu nyala terus coba lagi.<br>
-            <small>Kalo masih error, hubungi operator sekolah ya.</small>
+            ⏳ <b>AKSES DITUTUP SEMENTARA</b><br>
+            Server waktu lagi gangguan. Coba lagi 1 menit.<br>
+            <small>Demi keamanan, akses dikunci kalo waktu nggak bisa diverifikasi.</small>
         `;
         btn.disabled = false;
         btn.textContent = 'Cek Hasil';
         return;
     }
 
-    // KALO UDAH LEWAT JAM BUKA, LANJUT CEK NISN + LOADING 1 MENIT
+    if (sekarang < TANGGAL_BUKA) {
+        const options = {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta'
+        };
+        const waktuBuka = TANGGAL_BUKA.toLocaleDateString('id-ID', options) + ' WIB';
+        const waktuServer = sekarang.toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' });
+
+        errorP.innerHTML = `
+            ⏳ <b>BELUM WAKTUNYA DEK!</b><br>
+            Akses dibuka: <b>${waktuBuka}</b><br><br>
+            Waktu server sekarang: ${waktuServer} WIB<br>
+            <small>Mundurin jam HP + matiin internet nggak mempan 😏</small>
+        `;
+        btn.disabled = false;
+        btn.textContent = 'Cek Hasil';
+        return;
+    }
+
+    // LANJUT CEK NISN + LOADING 1 MENIT
     const siswa = Object.entries(dataSiswa).find(([key]) => key === nisn);
     if (!siswa) {
         errorP.textContent = 'NISN tidak ditemukan. Silahkan Hubungi Operator Sekolah';
